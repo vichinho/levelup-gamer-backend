@@ -269,7 +269,7 @@ Este proyecto es de uso academico.
 ENLACES RELACIONADOS
 ========================================
 
-- Backend Repository: https://github.com/valdasy/levelup-gamer-backend
+- Backend Repository: https://github.com/vichinho/levelup-gamer-backend
 - Documentacion API: http://localhost:8081/swagger-ui.html
 
 ========================================
