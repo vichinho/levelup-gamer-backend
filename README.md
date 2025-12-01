@@ -1,255 +1,277 @@
-# README.md - Microservicio Gestión de Usuarios
+========================================
+LEVEL UP GAMER - Frontend
+========================================
 
-## Descripción del Proyecto
+Plataforma e-commerce gaming desarrollada con React, integrada con backend Spring Boot para la Evaluacion Parcial 3 de Desarrollo FullStack II.
 
-Microservicio de gestión de usuarios, roles y permisos para la plataforma Level-Up Gamer. Este microservicio forma parte de una arquitectura de microservicios para una tienda online de productos gaming que opera en Chile.
+========================================
+DESCRIPCION DEL PROYECTO
+========================================
 
-## Información del Proyecto
+Level Up Gamer es una aplicacion web full-stack que permite a los usuarios navegar por un catalogo de productos gaming, gestionar su carrito de compras, realizar pedidos y administrar productos (panel admin). El sistema incluye autenticacion JWT, gestion de roles y persistencia de sesion.
 
-- **Nombre:** gestion-usuarios
-- **Tipo:** Microservicio REST API
-- **Puerto:** 8081
-- **Base de datos:** MySQL 8.0
-- **Lenguaje:** Java 17
-- **Framework:** Spring Boot 3.3.4
+========================================
+CARACTERISTICAS PRINCIPALES
+========================================
 
-## Tecnologías Utilizadas
+Para Usuarios:
+- Catalogo de productos con filtros y busqueda
+- Carrito de compras persistente con backend
+- Sistema de registro y login con JWT
+- Gestion de sesion con persistencia en localStorage
+- Diseno responsivo y moderno
+- Proceso de checkout integrado
 
-- Spring Boot 3.3.4
-- Spring Data JPA
-- Spring Web
-- MySQL 8.0
-- Maven
-- Lombok 1.18.34
-- BCrypt (jbcrypt 0.4)
-- Bean Validation
-- Hibernate 6.5.3
+Para Administradores:
+- Dashboard con estadisticas en tiempo real
+- Crear, editar y eliminar productos
+- Gestion de categorias
+- Administracion de usuarios
+- Panel de control intuitivo con sidebar
 
-## Estructura del Proyecto
+========================================
+TECNOLOGIAS UTILIZADAS
+========================================
 
-```
-gestion-usuarios/
-├── src/main/java/com/levelup/gestionusuarios/
-│   ├── entity/              (UsuarioEntity, RolEntity, PermisoEntity)
-│   ├── repository/          (UsuarioRepository, RolRepository, PermisoRepository)
-│   ├── model/               (TipoRol enum)
-│   ├── dto/                 (UsuarioDTO, RolDTO, PermisoDTO, UsuarioCreateDTO)
-│   ├── service/             (UsuarioService, RolService, PermisoService)
-│   ├── controller/          (UsuarioController, RolController, PermisoController)
-│   └── GestionUsuariosApplication.java
-├── src/main/resources/
-│   └── application.properties
-└── pom.xml
-```
+- React 18 - Framework principal
+- React Router DOM - Navegacion y rutas protegidas
+- Context API - Gestion de estado global (Carrito)
+- Axios - Cliente HTTP para API REST
+- CSS3 - Estilos modernos con gradientes y animaciones
+- JWT - Autenticacion y autorizacion
+- LocalStorage - Persistencia de sesion
 
-## Funcionalidades Principales
+========================================
+REQUISITOS PREVIOS
+========================================
 
-### Gestión de Usuarios
+- Node.js (version 16 o superior)
+- npm (version 8 o superior)
+- Backend Spring Boot corriendo en http://localhost:8081
 
-- CRUD completo de usuarios
-- Validación de edad (mayores de 18 años)
-- Descuento automático del 20% para correos @duoc.cl
-- Encriptación de contraseñas con BCrypt
-- Búsqueda por nombre, apellido o email
-- Borrado lógico y físico de usuarios
-- Sistema de puntos LevelUp
-
-### Gestión de Roles
-
-- CRUD completo de roles
-- Asignación de permisos a roles
-- Roles predefinidos: ADMIN, USER, MODERATOR
-
-### Gestión de Permisos
-
-- CRUD completo de permisos
-- Definición de permisos por recurso y método HTTP
-- Permisos granulares para cada operación
-
-### Relaciones
-
-- Many-to-Many entre Usuarios y Roles
-- Many-to-Many entre Roles y Permisos
-
-## Configuración de la Base de Datos
-
-### Crear Base de Datos
-
-```sql
-CREATE DATABASE levelup_usuarios;
-```
-
-### Configuración en application.properties
-
-```properties
-server.port=8081
-spring.application.name=gestion-usuarios
-
-spring.datasource.url=jdbc:mysql://localhost:3306/levelup_usuarios?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=admin
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
-```
-
-### Cambiar Plugin de Autenticación MySQL (si es necesario)
-
-```sql
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'admin';
-FLUSH PRIVILEGES;
-```
-
-## Instalación y Ejecución
-
-### Requisitos Previos
-
-- JDK 17 o superior
-- Maven 3.6 o superior
-- MySQL 8.0
-- Postman (para pruebas)
-
-### Pasos de Instalación
+========================================
+INSTALACION Y EJECUCION
+========================================
 
 1. Clonar el repositorio
-2. Configurar MySQL con las credenciales correctas
-3. Actualizar application.properties si es necesario
-4. Compilar el proyecto:
 
-```bash
-mvn clean install
-```
+git clone https://github.com/valdasy/levelup-gamer-frontend.git
+cd levelup-gamer-frontend
 
-5. Ejecutar la aplicación:
+2. Instalar dependencias
 
-```bash
-mvn spring-boot:run
-```
+npm install
 
-La aplicación iniciará en http://localhost:8081
+3. Configurar variables de entorno (opcional)
 
-## Endpoints de la API
+Crear archivo .env en la raiz:
 
-### Usuarios
+REACT_APP_API_URL=http://localhost:8081
 
-| Método | Endpoint                                | Descripción                  |
-| ------ | --------------------------------------- | ---------------------------- |
-| POST   | /api/usuarios                           | Crear usuario                |
-| GET    | /api/usuarios                           | Obtener todos los usuarios   |
-| GET    | /api/usuarios/{id}                      | Obtener usuario por ID       |
-| GET    | /api/usuarios/email/{email}             | Obtener usuario por email    |
-| GET    | /api/usuarios/activos                   | Obtener usuarios activos     |
-| GET    | /api/usuarios/buscar?termino={termino}  | Buscar por nombre o apellido |
-| PUT    | /api/usuarios/{id}                      | Actualizar usuario           |
-| DELETE | /api/usuarios/{id}                      | Eliminar usuario (lógico)    |
-| DELETE | /api/usuarios/{id}/fisico               | Eliminar usuario físicamente |
-| POST   | /api/usuarios/{usuarioId}/roles/{rolId} | Agregar rol a usuario        |
-| DELETE | /api/usuarios/{usuarioId}/roles/{rolId} | Remover rol de usuario       |
+4. Ejecutar en modo desarrollo
 
-### Roles
+npm start
 
-| Método | Endpoint                                | Descripción             |
-| ------ | --------------------------------------- | ----------------------- |
-| POST   | /api/roles                              | Crear rol               |
-| GET    | /api/roles                              | Obtener todos los roles |
-| GET    | /api/roles/{id}                         | Obtener rol por ID      |
-| GET    | /api/roles/nombre/{nombre}              | Obtener rol por nombre  |
-| PUT    | /api/roles/{id}                         | Actualizar rol          |
-| DELETE | /api/roles/{id}                         | Eliminar rol            |
-| POST   | /api/roles/{rolId}/permisos/{permisoId} | Agregar permiso a rol   |
-| DELETE | /api/roles/{rolId}/permisos/{permisoId} | Remover permiso de rol  |
+La aplicacion estara disponible en: http://localhost:3000
 
-### Permisos
+5. Generar build de produccion
 
-| Método | Endpoint                          | Descripción                      |
-| ------ | --------------------------------- | -------------------------------- |
-| POST   | /api/permisos                     | Crear permiso                    |
-| GET    | /api/permisos                     | Obtener todos los permisos       |
-| GET    | /api/permisos/{id}                | Obtener permiso por ID           |
-| GET    | /api/permisos/metodo/{metodoHttp} | Obtener permisos por método HTTP |
-| GET    | /api/permisos/recurso/{recurso}   | Obtener permisos por recurso     |
-| PUT    | /api/permisos/{id}                | Actualizar permiso               |
-| DELETE | /api/permisos/{id}                | Eliminar permiso                 |
+npm run build
 
-## Ejemplos de Uso
+========================================
+ESTRUCTURA DEL PROYECTO
+========================================
 
-### Crear Usuario
+src/
+├── components/          # Componentes reutilizables
+│   ├── Header/         # Navegacion principal
+│   ├── Footer/         # Pie de pagina
+│   ├── LoginForm/      # Formulario de login
+│   └── RegisterForm/   # Formulario de registro
+├── pages/              # Paginas principales
+│   ├── HomePage.jsx    # Landing page
+│   ├── AuthPage.jsx    # Login/Registro
+│   ├── ProductsPage.jsx # Catalogo
+│   ├── CartPage.jsx    # Carrito
+│   ├── AdminPage.jsx   # Dashboard admin
+│   └── AdminProductsPage.jsx # Gestion productos
+├── services/           # Servicios de API
+│   ├── authService.js  # Autenticacion JWT
+│   ├── productoService.js # Productos CRUD
+│   ├── categoriaService.js # Categorias
+│   └── carritoService.js # Carrito
+├── context/            # Context API
+│   └── CarritoContext.jsx # Estado global carrito
+├── App.js             # Configuracion de rutas
+└── index.js           # Punto de entrada
 
-```json
-POST /api/usuarios
-Content-Type: application/json
+========================================
+AUTENTICACION Y AUTORIZACION
+========================================
 
-{
-    "nombre": "Juan",
-    "apellido": "Pérez",
-    "email": "juan.perez@duoc.cl",
-    "password": "password123",
-    "fechaNacimiento": "1995-05-15",
-    "telefono": "+56912345678",
-    "direccion": "Av. Providencia 1234, Santiago"
-}
-```
+JWT Token:
+El sistema utiliza tokens JWT para autenticacion:
+- Token almacenado en localStorage
+- Enviado en header Authorization: Bearer {token}
+- Renovacion automatica en cada request
 
-### Crear Rol
+Roles de Usuario:
+- USER: Acceso a catalogo, carrito y checkout
+- ADMIN: Acceso adicional al panel de administracion
 
-```json
-POST /api/roles
-Content-Type: application/json
+========================================
+INTEGRACION CON BACKEND
+========================================
 
-{
-    "nombre": "ROLE_ADMIN",
-    "descripcion": "Administrador del sistema"
-}
-```
+Endpoints Principales:
 
-### Crear Permiso
+AUTENTICACION:
+- POST /api/auth/login - Iniciar sesion
+- POST /api/auth/register - Registrar usuario
 
-```json
-POST /api/permisos
-Content-Type: application/json
+PRODUCTOS:
+- GET /api/productos/activos - Listar productos
+- GET /api/productos/{id} - Detalle producto
+- POST /api/productos - Crear producto (Admin)
+- PUT /api/productos/{id} - Actualizar producto (Admin)
+- DELETE /api/productos/{id} - Eliminar producto (Admin)
 
-{
-    "nombre": "USER_READ",
-    "descripcion": "Permiso para leer usuarios",
-    "recurso": "/api/usuarios",
-    "metodoHttp": "GET"
-}
-```
+CARRITO:
+- GET /api/carrito - Obtener carrito del usuario
+- POST /api/carrito/agregar - Agregar producto
+- PUT /api/carrito/actualizar - Actualizar cantidad
+- DELETE /api/carrito/{id} - Eliminar item
 
-## Validaciones Implementadas
+CATEGORIAS:
+- GET /api/categorias/activas - Listar categorias
 
-- Email debe ser válido y único
-- Contraseña mínimo 6 caracteres
-- Edad mínima 18 años
-- Campos nombre, apellido, email y password son obligatorios
-- Fecha de nacimiento debe ser en el pasado
+========================================
+CARACTERISTICAS DE DISENO
+========================================
 
-## Reglas de Negocio
+Paleta de Colores:
+- Primary: #667eea -> #764ba2 (Gradiente morado)
+- Success: #43e97b
+- Warning: #ffc107
+- Danger: #dc3545
 
-- Usuario con email @duoc.cl recibe automáticamente 20% de descuento
-- El campo esMayorEdad se calcula automáticamente según la fecha de nacimiento
-- Las contraseñas se almacenan encriptadas con BCrypt
-- El password no se incluye en las respuestas JSON por seguridad
-- Los usuarios nuevos inician con 0 puntos LevelUp
-- El rol USER se asigna automáticamente al crear un usuario
+Animaciones:
+- Fade In/Out
+- Slide Up
+- Hover Effects
+- Loading Spinners
 
-## Pruebas con Postman
+Responsividad:
+- Mobile First
+- Breakpoints: 480px, 768px, 1024px, 1400px
 
-Se incluye una colección de Postman con 44 requests organizados en 4 carpetas:
+========================================
+TESTING
+========================================
 
-1. Permisos (8 requests)
-2. Roles (10 requests)
-3. Usuarios (15 requests)
-4. Validaciones y Casos Especiales (6 requests)
+Ejecutar tests:
+npm test
 
-Importar la colección desde el archivo: `LevelUpGamer-GestionUsuarios.postman_collection.json`
+Con reporte de cobertura:
+npm run test:coverage
 
-## Autor
+Tests con Karma/Jasmine:
+npm run test:karma:single
 
-Proyecto desarrollado como parte de la Sumativa 2 - Optativo JAVA
+========================================
+CAPTURAS DE PANTALLA
+========================================
 
-## Estado del Proyecto
+Homepage:
+- Hero section con gradiente
+- Productos destacados
+- Categorias rapidas
+- Features section
 
-Completado y funcional
+Panel Admin:
+- Dashboard con estadisticas
+- Sidebar de navegacion
+- Gestion CRUD de productos
+- Modal para crear/editar
+
+Carrito:
+- Lista de productos
+- Actualizacion de cantidades
+- Calculo automatico de totales
+- Boton de checkout
+
+========================================
+SCRIPTS DISPONIBLES
+========================================
+
+Desarrollo:
+npm start              # Servidor desarrollo (puerto 3000)
+npm run build          # Build de produccion
+
+Testing:
+npm test              # Tests Jest en modo watch
+npm run test:coverage # Reporte de cobertura Jest
+npm run test:karma    # Tests Karma/Jasmine
+
+Otros:
+npm run eject         # Exponer configuracion CRA
+
+========================================
+SEGURIDAD IMPLEMENTADA
+========================================
+
+- Autenticacion JWT con roles
+- Rutas protegidas por rol
+- Validacion de tokens en cada request
+- Gestion segura de sesion
+- Logout con limpieza de datos
+- Restricciones de acceso en frontend y backend
+
+========================================
+SOLUCION DE PROBLEMAS
+========================================
+
+Error 401 - No autorizado:
+- Verificar que el token JWT este en localStorage
+- Hacer logout y login nuevamente
+
+Error 404 - Endpoint no encontrado:
+- Verificar que el backend este corriendo en puerto 8081
+- Revisar CORS en el backend
+
+Productos no cargan:
+- Verificar conexion con MySQL
+- Revisar que haya productos activos en la BD
+
+========================================
+NOTAS DE DESARROLLO
+========================================
+
+- El modo DEMO permite probar sin base de datos conectada
+- Los datos mock estan disponibles para desarrollo
+- El token expira despues de 24 horas
+
+========================================
+AUTOR
+========================================
+
+Proyecto Academico - Evaluacion Parcial 3
+Asignatura: DSY1104 - Desarrollo FullStack II
+Institucion: DuocUC
+
+========================================
+LICENCIA
+========================================
+
+Este proyecto es de uso academico.
+
+========================================
+ENLACES RELACIONADOS
+========================================
+
+- Backend Repository: https://github.com/valdasy/levelup-gamer-backend
+- Documentacion API: http://localhost:8081/swagger-ui.html
+
+========================================
+Desarrollado con React y Spring Boot
+========================================
