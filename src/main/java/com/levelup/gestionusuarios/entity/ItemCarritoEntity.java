@@ -1,5 +1,6 @@
 package com.levelup.gestionusuarios.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference; // ✅ AGREGAR ESTE IMPORT
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,8 +19,10 @@ public class ItemCarritoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    // ✅ AGREGAR @JsonBackReference AQUÍ
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carrito_id", nullable = false)
+    @JsonBackReference // ✅ Esto evita el bucle infinito al serializar JSON
     private CarritoEntity carrito;
     
     @ManyToOne(fetch = FetchType.EAGER)

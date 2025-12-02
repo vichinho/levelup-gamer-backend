@@ -1,5 +1,6 @@
 package com.levelup.gestionusuarios.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference; // ✅ IMPORTANTE
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +26,9 @@ public class CarritoEntity {
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private UsuarioEntity usuario;
     
+    // ✅ SOLUCIÓN: @JsonManagedReference evita el bucle infinito al serializar JSON
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference 
     private List<ItemCarritoEntity> items = new ArrayList<>();
     
     @Column(nullable = false, precision = 10, scale = 2)

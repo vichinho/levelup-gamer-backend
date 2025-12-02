@@ -80,6 +80,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/productos/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/productos/categoria/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/productos/buscar").permitAll()
+                .requestMatchers("/api/carrito/**").permitAll()
+
 
                 // Categorías públicas
                 .requestMatchers(HttpMethod.GET, "/api/categorias/activas").permitAll()
