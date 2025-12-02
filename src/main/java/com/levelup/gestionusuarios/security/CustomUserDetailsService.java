@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,23 +22,34 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UsuarioEntity usuario = usuarioRepository.findByEmail(email)
+        // Cargar usuario + roles
+        UsuarioEntity usuario = usuarioRepository.findByEmailWithRoles(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
-        return User.builder()
-                .username(usuario.getEmail())
-                .password(usuario.getPassword())
-                .authorities(getAuthorities(usuario))
-                .accountExpired(false)
-                .accountLocked(!usuario.getActivo())
-                .credentialsExpired(false)
-                .disabled(!usuario.getActivo())
-                .build();
-    }
+        // Logs de debug
+        System.out.println("========================================");
+        System.out.println("Usuario: " + usuario.getEmail());
+        System.out.println("Roles count: " + usuario.getRoles().size());
+        usuario.getRoles().forEach(rol -> System.out.println("Rol: " + rol.getNombre()));
+        System.out.println("========================================");
 
-    private Collection<? extends GrantedAuthority> getAuthorities(UsuarioEntity usuario) {
-        return usuario.getRoles().stream()
+        Set<GrantedAuthority> authorities = usuario.getRoles().stream()
                 .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+
+        if (authorities.isEmpty()) {
+            System.out.println("⚠️ No se encontraron roles, asignando USER por defecto");
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
+        return new User(
+                usuario.getEmail(),
+                usuario.getPassword(),
+                usuario.getActivo(), // getActivo() (Boolean con Lombok)
+                true,
+                true,
+                true,
+                authorities
+        );
     }
 }

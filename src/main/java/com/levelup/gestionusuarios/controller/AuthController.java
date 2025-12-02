@@ -2,7 +2,10 @@ package com.levelup.gestionusuarios.controller;
 
 import com.levelup.gestionusuarios.dto.LoginRequest;
 import com.levelup.gestionusuarios.dto.LoginResponse;
+import com.levelup.gestionusuarios.dto.UsuarioCreateDTO;
+import com.levelup.gestionusuarios.entity.RolEntity;
 import com.levelup.gestionusuarios.entity.UsuarioEntity;
+import com.levelup.gestionusuarios.repository.RolRepository;
 import com.levelup.gestionusuarios.repository.UsuarioRepository;
 import com.levelup.gestionusuarios.security.CustomUserDetailsService;
 import com.levelup.gestionusuarios.security.JwtUtil;
@@ -13,8 +16,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,38 +39,39 @@ public class AuthController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private RolRepository rolRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // LOGIN
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            // Autenticar usuario
             authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getEmail(), 
-                    loginRequest.getPassword()
-                )
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
             );
 
-            // Cargar detalles del usuario
             final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
 
-            // Obtener usuario de la BD
-            UsuarioEntity usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
+            UsuarioEntity usuario = usuarioRepository.findByEmailWithRoles(loginRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-            // Generar token
             final String jwt = jwtUtil.generateToken(userDetails);
 
-            // Extraer roles
-            var roles = userDetails.getAuthorities().stream()
+            List<String> roles = userDetails.getAuthorities().stream()
                     .map(auth -> auth.getAuthority().replace("ROLE_", ""))
                     .collect(Collectors.toList());
 
-            // Respuesta
             LoginResponse response = new LoginResponse(
-                jwt,
-                usuario.getEmail(),
-                usuario.getNombreCompleto(),
-                roles
+                    jwt,
+                    usuario.getEmail(),
+                    usuario.getNombreCompleto(),
+                    roles
             );
 
             return ResponseEntity.ok(response);
@@ -76,6 +82,54 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error en el servidor: " + e.getMessage());
+        }
+    }
+
+    // REGISTRO (con asignación de rol USER y login automático)
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UsuarioCreateDTO registroDTO) {
+        try {
+            if (usuarioRepository.existsByEmail(registroDTO.getEmail())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("El email ya está registrado");
+            }
+
+            UsuarioEntity usuario = new UsuarioEntity();
+            usuario.setNombre(registroDTO.getNombre());
+            usuario.setApellido(registroDTO.getApellido());
+            usuario.setEmail(registroDTO.getEmail());
+            usuario.setPassword(passwordEncoder.encode(registroDTO.getPassword()));
+            usuario.setFechaNacimiento(registroDTO.getFechaNacimiento());
+            usuario.setTelefono(registroDTO.getTelefono());
+            usuario.setDireccion(registroDTO.getDireccion());
+            usuario.setActivo(true);
+
+            // Asignar rol USER por defecto
+            RolEntity rolUser = rolRepository.findByNombre("USER")
+                    .orElseThrow(() -> new RuntimeException("Rol USER no encontrado en la base de datos"));
+            usuario.getRoles().add(rolUser);
+
+            usuarioRepository.save(usuario);
+
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getEmail());
+            final String jwt = jwtUtil.generateToken(userDetails);
+
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                    .collect(Collectors.toList());
+
+            LoginResponse response = new LoginResponse(
+                    jwt,
+                    usuario.getEmail(),
+                    usuario.getNombre() + " " + usuario.getApellido(),
+                    roles
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al registrar usuario: " + e.getMessage());
         }
     }
 }

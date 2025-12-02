@@ -1,6 +1,7 @@
 package com.levelup.gestionusuarios.controller;
 
 import com.levelup.gestionusuarios.entity.CarritoEntity;
+import com.levelup.gestionusuarios.repository.UsuarioRepository;
 import com.levelup.gestionusuarios.service.CarritoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,13 +19,24 @@ public class CarritoController {
     @Autowired
     private CarritoService carritoService;
     
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    // Método helper para obtener el ID del usuario autenticado
+    private Long getUsuarioId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Usuario no autenticado");
+        }
+        String email = authentication.getName();
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"))
+                .getId();
+    }
+    
     @GetMapping
     @Operation(summary = "Obtener carrito del usuario actual")
     public ResponseEntity<CarritoEntity> obtenerCarrito(Authentication authentication) {
-        // Aquí deberías obtener el ID del usuario desde el token JWT
-        // Por ahora usaremos un ID de prueba
-        Long usuarioId = 1L; // TODO: Obtener del authentication
-        
+        Long usuarioId = getUsuarioId(authentication);
         CarritoEntity carrito = carritoService.obtenerOCrearCarrito(usuarioId);
         return ResponseEntity.ok(carrito);
     }
@@ -36,8 +48,7 @@ public class CarritoController {
             @RequestParam Integer cantidad,
             Authentication authentication) {
         try {
-            Long usuarioId = 1L; // TODO: Obtener del authentication
-            
+            Long usuarioId = getUsuarioId(authentication);
             CarritoEntity carrito = carritoService.agregarProducto(usuarioId, productoId, cantidad);
             return ResponseEntity.ok(carrito);
         } catch (Exception e) {
@@ -52,8 +63,7 @@ public class CarritoController {
             @RequestParam Integer cantidad,
             Authentication authentication) {
         try {
-            Long usuarioId = 1L; // TODO: Obtener del authentication
-            
+            Long usuarioId = getUsuarioId(authentication);
             CarritoEntity carrito = carritoService.actualizarCantidad(usuarioId, itemId, cantidad);
             return ResponseEntity.ok(carrito);
         } catch (Exception e) {
@@ -67,8 +77,7 @@ public class CarritoController {
             @PathVariable Long itemId,
             Authentication authentication) {
         try {
-            Long usuarioId = 1L; // TODO: Obtener del authentication
-            
+            Long usuarioId = getUsuarioId(authentication);
             CarritoEntity carrito = carritoService.eliminarItem(usuarioId, itemId);
             return ResponseEntity.ok(carrito);
         } catch (Exception e) {
@@ -80,8 +89,7 @@ public class CarritoController {
     @Operation(summary = "Vaciar carrito")
     public ResponseEntity<?> vaciarCarrito(Authentication authentication) {
         try {
-            Long usuarioId = 1L; // TODO: Obtener del authentication
-            
+            Long usuarioId = getUsuarioId(authentication);
             carritoService.vaciarCarrito(usuarioId);
             return ResponseEntity.ok("Carrito vaciado exitosamente");
         } catch (Exception e) {
